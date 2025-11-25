@@ -1,12 +1,11 @@
-/**
- * @providesModule DataWedgeIntents
- */
-
-'use strict'
-
 import { Platform, NativeModules } from 'react-native'
 
-const RNDataWedgeIntents = NativeModules.DataWedgeIntents
+interface RNDataWedgeIntentsModule {
+  sendBroadcastWithExtras(extras: any): void
+  registerBroadcastReceiver(filter: any): void
+}
+
+const RNDataWedgeIntents = NativeModules.DataWedgeIntents as RNDataWedgeIntentsModule
 
 // Define constants in JS to avoid bridge calls and Java dependency
 const Constants = {
@@ -26,18 +25,18 @@ const Constants = {
 const DataWedgeIntents = {
   ...Constants,
 
-  sendBroadcastWithExtras(extrasObject) {
+  sendBroadcastWithExtras(extrasObject: any) {
     if (Platform.OS === 'android') {
       RNDataWedgeIntents.sendBroadcastWithExtras(extrasObject)
     }
   },
 
-  registerBroadcastReceiver(filter) {
+  registerBroadcastReceiver(filter: { filterActions: string[]; filterCategories: string[] }) {
     if (Platform.OS === 'android') {
       RNDataWedgeIntents.registerBroadcastReceiver(filter)
     }
   }
 }
 
-export { DataWedgeService }
+export { RNDataWedgeIntents }
 export default DataWedgeIntents
