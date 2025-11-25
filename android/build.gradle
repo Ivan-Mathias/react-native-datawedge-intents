@@ -2,23 +2,37 @@ def safeExtGet(prop, fallback) {
     rootProject.ext.has(prop) ? rootProject.ext.get(prop) : fallback
 }
 
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        // Matches modern React Native gradle plugin requirements
+        classpath 'com.android.tools.build:gradle:8.0.0'
+    }
+}
+
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion safeExtGet('compileSdkVersion', 27)
-    //noinspection GradleDependency
-    buildToolsVersion safeExtGet('buildToolsVersion', '27.0.3')
+    // MUST be 33 or higher to use RECEIVER_EXPORTED/NOT_EXPORTED flags
+    compileSdkVersion safeExtGet('compileSdkVersion', 34)
+    buildToolsVersion safeExtGet('buildToolsVersion', '34.0.0')
 
     defaultConfig {
-        minSdkVersion safeExtGet('minSdkVersion', 16)
-        //noinspection OldTargetApi
-        targetSdkVersion safeExtGet('targetSdkVersion', 27)
-        versionCode 7
-        versionName "0.0.1"
+        // Android 8.0+ support (API 26)
+        minSdkVersion safeExtGet('minSdkVersion', 26)
+
+        // Target 34 to satisfy modern Android security requirements
+        targetSdkVersion safeExtGet('targetSdkVersion', 34)
+
+        // Kept your versioning
+        versionCode 8
+        versionName "0.1.0"
     }
 }
 
 dependencies {
     implementation 'com.facebook.react:react-native:+'
 }
-
