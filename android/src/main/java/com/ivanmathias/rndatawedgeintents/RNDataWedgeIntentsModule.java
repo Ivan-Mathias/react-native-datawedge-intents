@@ -86,7 +86,8 @@ public class RNDataWedgeIntentsModule extends ReactContextBaseJavaModule impleme
     }
 
     @Override
-    public void onCatalystInstanceDestroy() {
+    public void invalidate() {
+        super.invalidate();
         unregisterReceiverSafely();
     }
 
@@ -136,36 +137,35 @@ public class RNDataWedgeIntentsModule extends ReactContextBaseJavaModule impleme
         if (obj.hasKey("extras")) {
             ReadableMap extras = obj.getMap("extras");
             if (extras != null) {
-                ReadableMapKeySetIterator iterator = extras.keySetIterator();
-                while (iterator.hasNextKey()) {
-                    String key = iterator.nextKey();
-                    switch (extras.getType(key)) {
-                        case Boolean:
-                            i.putExtra(key, extras.getBoolean(key));
-                            break;
-                        case Number:
-                            // React Native numbers are doubles, need to infer type safely
-                            double val = extras.getDouble(key);
-                            if (val % 1 == 0) {
-                                i.putExtra(key, (long) val);
-                            } else {
-                                i.putExtra(key, val);
-                            }
-                            break;
-                        case String:
-                            String valueStr = extras.getString(key);
-                             // Handle JSON Strings if needed (legacy support)
-                            if (valueStr != null && valueStr.startsWith("{")) {
-                                try {
-                                    Bundle bundle = toBundle(new JSONObject(valueStr));
-                                    i.putExtra(key, bundle);
-                                } catch (JSONException e) {
-                                    i.putExtra(key, valueStr);
-                                }
-                            } else {
+                Map<String, Object> extrasMap = extras.toHashMap();
+
+                for (Map.Entry<String, Object> entry : extrasMap.entrySet()) {
+                    String key = entry.getKey();
+                    Object value = entry.getValue();
+
+                    if (value == null) continue;
+
+                    if (value instanceof Boolean) {
+                        i.putExtra(key, (Boolean) value);
+                    } else if (value instanceof Number) {
+                        double val = ((Number) value).doubleValue();
+                        if (val % 1 == 0) {
+                            i.putExtra(key, (long) val);
+                        } else {
+                            i.putExtra(key, val);
+                        }
+                    } else if (value instanceof String) {
+                        String valueStr = (String) value;
+                        if (valueStr.startsWith("{")) {
+                            try {
+                                Bundle bundle = toBundle(new JSONObject(valueStr));
+                                i.putExtra(key, bundle);
+                            } catch (JSONException e) {
                                 i.putExtra(key, valueStr);
                             }
-                            break;
+                        } else {
+                            i.putExtra(key, valueStr);
+                        }
                     }
                 }
             }
