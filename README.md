@@ -1,92 +1,138 @@
-*Please be aware that this application / sample is provided as-is for demonstration purposes without any guarantee of support*
-=========================================================
+# React Native DataWedge Intents (Modern Fork)
 
+A modernized, TypeScript-first fork of `react-native-datawedge-intents` designed to support **Android 14+ (API 34)** and Zebra devices running the latest DataWedge versions.
 
-# React-Native-DataWedge-Intents
-React Native Android module to interface with Zebra's DataWedge Intent API
+### Key Features
 
-[![npm version](http://img.shields.io/npm/v/react-native-datawedge-intents.svg?style=flat-square)](https://npmjs.org/package/react-native-datawedge-intents "View this project on npm")
-[![npm downloads](http://img.shields.io/npm/dm/react-native-datawedge-intents.svg?style=flat-square)](https://npmjs.org/package/react-native-datawedge-intents "View this project on npm")
-[![npm downloads](http://img.shields.io/npm/dt/react-native-datawedge-intents.svg?style=flat-square)](https://npmjs.org/package/react-native-datawedge-intents "View this project on npm")
-[![npm licence](http://img.shields.io/npm/l/react-native-datawedge-intents.svg?style=flat-square)](https://npmjs.org/package/react-native-datawedge-intents "View this project on npm")
+- **Android 14 Support:** Fixed `Context.RECEIVER_EXPORTED` crashes on newer Android versions.
+- **TypeScript:** Written in TS with full type definitions included.
+- **Batteries Included:** Includes a high-level `DataWedgeService` that handles Profile creation, configuration, and intent parsing automatically.
+- **Modern Build:** Updated to Gradle 8 and compiles against SDK 34.
+- **Compatibility:** Works with Expo SDK 54 with edge-to-edge
 
-This module is useful when developing React Native applications for Zebra mobile computers, making use of the Barcode Scanner
+---
 
-### Installation
+### 📦 Installation
+
+Since this is a fork, install it directly from GitHub:
 
 ```bash
-npm install react-native-datawedge-intents --save
-react-native link react-native-datawedge-intents 
-```
-Note: as of ReactNative version 0.27 automatic installation of modules is supported via react-native link ... If you are running a version earlier than 0.26 then you will be required to manually install the module.  More detail on manual installation of a typical module can be found [here](https://github.com/Microsoft/react-native-code-push#plugin-installation-android---manual).
-
-## Example usage
-
-There are two samples available for this module:
-
-**Please see [RNDataWedgeIntentDemo](https://github.com/darryncampbell/RNDataWedgeIntentDemo) for a basic sample application that makes use of this module**, file [index.android.js](https://github.com/darryncampbell/RNDataWedgeIntentDemo/blob/master/index.android.js).  This application is a little dated now and is designed to work with version 0.0.2 of this module.
-
-```javascript
-import DataWedgeIntents from 'react-native-datawedge-intents'
-...
-//  Register a receiver for the barcode scans with the appropriate action
-DataWedgeIntents.registerReceiver('com.zebra.dwintents.ACTION', '');
-...
-//  Declare a handler for barcode scans
-this.scanHandler = (deviceEvent) => {console.log(deviceEvent);};
-...
-//  Listen for scan events sent from the module
-DeviceEventEmitter.addListener('barcode_scan', this.scanHandler);
-...
-//  Initiate a scan (you could also press the trigger key)
-DataWedgeIntents.sendIntent(DataWedgeIntents.ACTION_SOFTSCANTRIGGER,DataWedgeIntents.START_SCANNING);
-
+npm install github:IvanMathias/react-native-datawedge-intents
 ```
 
-**Please see [DataWedgeReactNative](https://github.com/darryncampbell/DataWedgeReactNative) for a more fully featured and up to date application that makes use of this module**, file [App.js](https://github.com/darryncampbell/DataWedgeReactNative/blob/master/App.js).  This application requires a minimum version of 0.1.0 of this module.
+> **⚠️ Important:** Since this library contains native Android code changes, you must rebuild your native app:
+> `npx expo run:android` or `cd android && ./gradlew clean && cd .. && npx react-native run-android`
 
-```javascript
+---
+
+### 🛠 Usage: DataWedgeService (Recommended)
+
+This fork includes a helper service that simplifies the integration. It automatically registers the receiver, creates the DataWedge profile on the device, and configures the scanner plugins.
+
+#### 1\. Initialize the Service
+
+Call this once when your app mounts (e.g., in a `useEffect` inside your root layout or App.tsx).
+
+```typescript
+import { useEffect } from 'react'
+import { DeviceEventEmitter } from 'react-native'
+import { DataWedgeService } from 'react-native-datawedge-intents'
+import Constants from 'expo-constants' // or react-native-device-info
+
+// ... inside your component
+useEffect(() => {
+  try {
+    DataWedgeService.initialize({
+      // Your app's package name (required to filter intents correctly)
+      packageName: Constants.expoConfig?.android?.package ?? 'com.your.app.package',
+
+      // Optional: Disable the keyboard output to prevent double-typing
+      disableKeystroke: true
+    })
+
+    // Listener for scans
+    const subscription = DeviceEventEmitter.addListener('datawedge_broadcast_intent', (intent) => {
+      handleScan(intent)
+    })
+
+    return () => {
+      subscription.remove()
+    }
+  } catch (e) {
+    console.error(e)
+  }
+}, [])
+```
+
+#### 2\. Handle Scans
+
+The service provides a helper to parse the raw Android Intent into a clean object.
+
+```typescript
+const handleScan = (intent: any) => {
+  const scan = DataWedgeService.parseIntentToScan(intent)
+
+  if (scan) {
+    console.log('Data:', scan.data) // e.g. "789123456"
+    console.log('Type:', scan.decoder) // e.g. "ean13"
+  }
+}
+```
+
+#### 3\. Control Scanner (Illumination)
+
+Toggle the torch/flashlight mode of the scanner.
+
+```typescript
+// Turn light ON
+DataWedgeService.setIllumination(true)
+
+// Turn light OFF
+DataWedgeService.setIllumination(false)
+```
+
+---
+
+### ⚙️ Usage: Low-Level API
+
+If you prefer to manually manage filters and profiles, you can use the low-level primitives.
+
+> **Note:** Deprecated methods like `registerReceiver` (string arg) and `sendIntent` have been removed in favor of the more robust `registerBroadcastReceiver` and `sendBroadcastWithExtras`.
+
+```typescript
 import DataWedgeIntents from 'react-native-datawedge-intents'
-...
-//  Register a receiver for the barcode scans with the appropriate action
+import { Platform } from 'react-native'
+
+// 1. Register Receiver
 DataWedgeIntents.registerBroadcastReceiver({
-  filterActions: [
-      'com.zebra.reactnativedemo.ACTION',
-      'com.symbol.datawedge.api.RESULT_ACTION'
-  ],
-  filterCategories: [
-      'android.intent.category.DEFAULT'
-  ]
-});
-...
-//  Declare a handler for broadcast intents
-this.broadcastReceiverHandler = (intent) =>
-{
-  this.broadcastReceiver(intent);
+  filterActions: ['com.symbol.datawedge.api.RESULT_ACTION', 'com.your.custom.action'],
+  filterCategories: ['android.intent.category.DEFAULT']
+})
+
+// 2. Send Command (Example: Soft Trigger)
+const extras = {
+  'com.symbol.datawedge.api.SOFT_SCAN_TRIGGER': 'TOGGLE_SCANNING'
 }
-...
-//  Initiate a scan (you could also press the trigger key)
-this.sendCommand("com.symbol.datawedge.api.SOFT_SCAN_TRIGGER", 'TOGGLE_SCANNING');
-...
-sendCommand(extraName, extraValue) {
-  console.log("Sending Command: " + extraName + ", " + JSON.stringify(extraValue));
-  var broadcastExtras = {};
-  broadcastExtras[extraName] = extraValue;
-  broadcastExtras["SEND_RESULT"] = this.sendCommandResult;
-  DataWedgeIntents.sendBroadcastWithExtras({
-    action: "com.symbol.datawedge.api.ACTION",
-    extras: broadcastExtras});
-}
+
+DataWedgeIntents.sendBroadcastWithExtras({
+  action: 'com.symbol.datawedge.api.ACTION',
+  extras: extras
+})
 ```
 
-## DataWedge
+---
 
-This module **requires the DataWedge service running** on the target device to be **correctly configured** to broadcast Android intents on each barcode scan with the appropriate action.  This can be achieved either manually or via an API, see the sample application readme files for a more thorough explanation.
+### Migrations from darryncampbell/react-native-datawedge-intents
 
-### Output Plugin
+If you are migrating from the original `darryncampbell` library:
 
-Please also ensure you disable the keyboard output plugin to avoid undesired effects on your application: [thread](https://developer.zebra.com/message/95397).
+1.  **Removed `ObservableObject`:** The library no longer maintains internal state observers. Use `DeviceEventEmitter` directly.
+2.  **Removed `registerReceiver(action, category)`:** Use `registerBroadcastReceiver(filterObj)` instead.
+3.  **Removed `sendIntent(action, value)`:** Use `sendBroadcastWithExtras(obj)` instead.
+4.  **Constants:** Java constants are no longer exported via NativeModules to improve performance. Use the string literals or the provided Service.
 
-For more information about DataWedge and how to configure it please visit Zebra [tech docs](http://techdocs.zebra.com/).  The DataWedge API that this module calls is detailed [here](http://techdocs.zebra.com/datawedge/latest/guide/api/)
+---
 
+### License
 
+MIT
