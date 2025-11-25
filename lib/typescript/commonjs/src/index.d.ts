@@ -1,8 +1,3 @@
-interface RNDataWedgeIntentsModule {
-    sendBroadcastWithExtras(extras: any): void;
-    registerBroadcastReceiver(filter: any): void;
-}
-declare const RNDataWedgeIntents: RNDataWedgeIntentsModule;
 declare const DataWedgeIntents: {
     sendBroadcastWithExtras(extrasObject: any): void;
     registerBroadcastReceiver(filter: {
@@ -21,6 +16,7 @@ declare const DataWedgeIntents: {
     ENABLE_PLUGIN: string;
     DISABLE_PLUGIN: string;
 };
-export { RNDataWedgeIntents };
+export type { Scan, DataWedgeConfig } from './DataWedgeService';
+export { default as DataWedgeService } from './DataWedgeService';
 export default DataWedgeIntents;
 //# sourceMappingURL=index.d.ts.map

@@ -38,5 +38,6 @@ const DataWedgeIntents = {
   }
 }
 
-export { RNDataWedgeIntents }
+export type { Scan, DataWedgeConfig } from './DataWedgeService'
+export { default as DataWedgeService } from './DataWedgeService'
 export default DataWedgeIntents
