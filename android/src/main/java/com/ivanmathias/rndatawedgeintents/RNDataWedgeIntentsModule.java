@@ -1,4 +1,4 @@
-package com.darryncampbell.rndatawedgeintents;
+package com.ivanmathias.rndatawedgeintents;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
