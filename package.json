@@ -1,7 +1,7 @@
 {
   "name": "react-native-datawedge-intents",
-  "version": "0.1.8",
-  "description": "React Native Android module to interface with Zebra's DataWedge using Android Intents to control the barcode scanner and retrieve scanned data",
+  "version": "0.2.0",
+  "description": "Forked React Native Android module for Zebra DataWedge. Supports Android 8+ through Android 14+ (API 34) with fixed BroadcastReceiver exports.",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -9,23 +9,29 @@
   "keywords": [
     "react",
     "react-native",
-    "react-component",
     "zebra",
     "dataWedge",
-    "scanning",
-    "industrial-mobility",
-    "tc55",
-    "tc8000",
-    "mc40",
-    "tc75",
-    "tc70",
-    "data-capture"
+    "android 13",
+    "MC33",
+    "MC3300",
+    "scanning"
   ],
   "author": "Darryn Campbell",
+  "contributors": [
+    {
+      "name": "Ivan Mathias",
+      "email": "ivanmathiassilva@gmail.com"
+    }
+  ],
   "license": "MIT",
-  "repository": "https://github.com/darryncampbell/react-native-datawedge-intents",
-  "bugs": "https://github.com/darryncampbell/react-native-datawedge-intents/issues",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/YOUR_USERNAME/react-native-datawedge-intents.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Ivan-Mathias/react-native-datawedge-intents.git/issues"
+  },
   "peerDependencies": {
-    "react-native": ">=0.56"
+    "react-native": ">=0.70.0"
   }
 }
