@@ -40,50 +40,45 @@ const DataWedgeService = {
       filterCategories: ['android.intent.category.DEFAULT']
     })
 
-    const barcodePluginConfig = {
+    const datawedgeConfig = {
       PROFILE_NAME: finalProfileName,
+      PROFILE_ENABLED: 'true',
       CONFIG_MODE: 'CREATE_IF_NOT_EXIST',
-      PLUGIN_CONFIG: {
-        PLUGIN_NAME: 'BARCODE',
-        PARAM_LIST: {
-          scanner_selection: 'auto',
-          illumination_mode: 'off',
-          decoder_i2of5: 'true',
-          decoder_itf14_convert_to_ean13: 'true'
-        }
-      },
-      APP_LIST: [{ PACKAGE_NAME: packageName, ACTIVITY_LIST: ['*'] }]
-    }
-
-    const intentPluginConfig = {
-      PROFILE_NAME: finalProfileName,
-      CONFIG_MODE: 'CREATE_IF_NOT_EXIST',
-      PLUGIN_CONFIG: {
-        PLUGIN_NAME: 'INTENT',
-        PARAM_LIST: {
-          intent_output_enabled: 'true',
-          intent_action: profileIntentAction,
-          intent_delivery: '2'
-        }
-      }
-    }
-
-    sendCommand('com.symbol.datawedge.api.CREATE_PROFILE', finalProfileName)
-    sendCommand('com.symbol.datawedge.api.SET_CONFIG', barcodePluginConfig)
-    sendCommand('com.symbol.datawedge.api.SET_CONFIG', intentPluginConfig)
-
-    if (disableKeystroke) {
-      const keystrokeConfig = {
-        PROFILE_NAME: finalProfileName,
-        PLUGIN_CONFIG: {
-          PLUGIN_NAME: 'KEYSTROKE',
+      APP_LIST: [{ PACKAGE_NAME: packageName, ACTIVITY_LIST: ['*'] }],
+      PLUGIN_CONFIG: [
+        {
+          PLUGIN_NAME: 'BARCODE',
+          RESET_CONFIG: 'true',
           PARAM_LIST: {
-            keystroke_output_enabled: 'false'
+            scanner_selection: 'auto',
+            illumination_mode: 'off',
+            decoder_i2of5: 'true',
+            decoder_itf14_convert_to_ean13: 'true'
           }
-        }
-      }
-      sendCommand('com.symbol.datawedge.api.SET_CONFIG', keystrokeConfig)
+        },
+        {
+          PLUGIN_NAME: 'INTENT',
+          RESET_CONFIG: 'true',
+          PARAM_LIST: {
+            intent_output_enabled: 'true',
+            intent_action: profileIntentAction,
+            intent_category: 'android.intent.category.DEFAULT',
+            intent_delivery: '2'
+          }
+        },
+        ...(disableKeystroke ? [
+          {
+            PLUGIN_NAME: 'KEYSTROKE',
+            RESET_CONFIG: 'true',
+            PARAM_LIST: {
+              keystroke_output_enabled: 'false'
+            }
+          }
+        ] : [])
+      ]
     }
+
+    sendCommand('com.symbol.datawedge.api.SET_CONFIG', datawedgeConfig)
   },
 
   /**
