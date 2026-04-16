@@ -5,8 +5,7 @@
   "main": "./lib/commonjs/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "bob build",
-    "prepack": "bob build"
+    "prepare": "bob build"
   },
   "keywords": [
     "react",
