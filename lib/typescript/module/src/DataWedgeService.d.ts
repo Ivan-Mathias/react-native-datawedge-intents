@@ -3,6 +3,11 @@ export type Scan = {
     decoder: string;
     timeAtDecode: Date;
 };
+export type DataWedgeIntent = {
+    'com.symbol.datawedge.data_string'?: string;
+    'com.symbol.datawedge.label_type'?: string;
+    [key: string]: unknown;
+};
 export interface DataWedgeConfig {
     packageName: string;
     profileName?: string;

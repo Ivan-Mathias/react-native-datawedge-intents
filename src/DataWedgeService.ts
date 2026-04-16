@@ -40,45 +40,53 @@ const DataWedgeService = {
       filterCategories: ['android.intent.category.DEFAULT']
     })
 
-    const datawedgeConfig = {
+    const barcodePluginConfig = {
       PROFILE_NAME: finalProfileName,
-      PROFILE_ENABLED: 'true',
       CONFIG_MODE: 'CREATE_IF_NOT_EXIST',
       APP_LIST: [{ PACKAGE_NAME: packageName, ACTIVITY_LIST: ['*'] }],
-      PLUGIN_CONFIG: [
-        {
-          PLUGIN_NAME: 'BARCODE',
-          RESET_CONFIG: 'true',
-          PARAM_LIST: {
-            scanner_selection: 'auto',
-            illumination_mode: 'off',
-            decoder_i2of5: 'true',
-            decoder_itf14_convert_to_ean13: 'true'
-          }
-        },
-        {
-          PLUGIN_NAME: 'INTENT',
-          RESET_CONFIG: 'true',
-          PARAM_LIST: {
-            intent_output_enabled: 'true',
-            intent_action: profileIntentAction,
-            intent_category: 'android.intent.category.DEFAULT',
-            intent_delivery: '2'
-          }
-        },
-        ...(disableKeystroke ? [
-          {
-            PLUGIN_NAME: 'KEYSTROKE',
-            RESET_CONFIG: 'true',
-            PARAM_LIST: {
-              keystroke_output_enabled: 'false'
-            }
-          }
-        ] : [])
-      ]
+      PLUGIN_CONFIG: {
+        PLUGIN_NAME: 'BARCODE',
+        RESET_CONFIG: 'true',
+        PARAM_LIST: {
+          scanner_selection: 'auto',
+          illumination_mode: 'off',
+          scanner_input_enabled: 'true',
+          decoder_i2of5: 'true',
+          decoder_itf14_convert_to_ean13: 'true'
+        }
+      }
     }
 
-    sendCommand('com.symbol.datawedge.api.SET_CONFIG', datawedgeConfig)
+    const intentPluginConfig = {
+      PROFILE_NAME: finalProfileName,
+      CONFIG_MODE: 'CREATE_IF_NOT_EXIST',
+      PLUGIN_CONFIG: {
+        PLUGIN_NAME: 'INTENT',
+        PARAM_LIST: {
+          intent_output_enabled: 'true',
+          intent_action: profileIntentAction,
+          intent_delivery: '2'
+        }
+      }
+    }
+
+    const keystrokePluginConfig = {
+      PROFILE_NAME: finalProfileName,
+      CONFIG_MODE: 'CREATE_IF_NOT_EXIST',
+      PLUGIN_CONFIG: {
+        PLUGIN_NAME: 'KEYSTROKE',
+        PARAM_LIST: {
+          keystroke_output_enabled: 'false'
+        }
+      }
+    }
+
+    sendCommand('com.symbol.datawedge.api.CREATE_PROFILE', finalProfileName)
+    sendCommand('com.symbol.datawedge.api.SET_CONFIG', barcodePluginConfig)
+    sendCommand('com.symbol.datawedge.api.SET_CONFIG', intentPluginConfig)
+    if (disableKeystroke) {
+      sendCommand('com.symbol.datawedge.api.SET_CONFIG', keystrokePluginConfig)
+    }
   },
 
   /**
@@ -102,12 +110,20 @@ const DataWedgeService = {
       intent &&
       Object.prototype.hasOwnProperty.call(intent, 'com.symbol.datawedge.data_string')
     ) {
+      console.log('Parsing intent to scan:', intent)
       return {
         data: intent['com.symbol.datawedge.data_string'] || '',
         decoder: intent['com.symbol.datawedge.label_type'] || 'unknown',
         timeAtDecode: new Date()
       }
     }
+
+    if (intent) {
+      console.log('Non-scan DataWedge intent received:', intent)
+    } else {
+      console.log('Non-scan DataWedge intent received: empty intent payload')
+    }
+
     return null
   }
 }

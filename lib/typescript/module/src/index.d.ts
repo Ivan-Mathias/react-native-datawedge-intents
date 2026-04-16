@@ -16,7 +16,7 @@ declare const DataWedgeIntents: {
     ENABLE_PLUGIN: string;
     DISABLE_PLUGIN: string;
 };
-export type { Scan, DataWedgeConfig } from './DataWedgeService';
+export type { Scan, DataWedgeConfig, DataWedgeIntent } from './DataWedgeService';
 export { default as DataWedgeService } from './DataWedgeService';
 export default DataWedgeIntents;
 //# sourceMappingURL=index.d.ts.map
