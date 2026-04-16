@@ -118,12 +118,6 @@ const DataWedgeService = {
       }
     }
 
-    if (intent) {
-      console.log('Non-scan DataWedge intent received:', intent)
-    } else {
-      console.log('Non-scan DataWedge intent received: empty intent payload')
-    }
-
     return null
   }
 }
